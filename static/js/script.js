@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURATION ---
     // PASTE YOUR PUBLIC RENDER URL HERE
-    const API_URL = 'https://your-app-name.onrender.com/find_games'; 
+    const API_URL = 'https://robloxfinder-github-io.onrender.com'; 
 
     const genres = ['Obby', 'Horror', 'Puzzle', 'Survival', 'Tycoon', 'RPG', 'Fighting', 'Simulator', 'Roleplay'];
     const devices = ['Any', 'PC', 'Mobile', 'Console', 'VR'];
