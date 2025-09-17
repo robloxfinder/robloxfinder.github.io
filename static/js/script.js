@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURATION ---
-    const API_URL = 'http://127.0.0.1:5000/find_games'; // This is for local testing
+    // PASTE YOUR PUBLIC RENDER URL HERE
+    const API_URL = 'https://your-app-name.onrender.com/find_games'; 
 
     const genres = ['Obby', 'Horror', 'Puzzle', 'Survival', 'Tycoon', 'RPG', 'Fighting', 'Simulator', 'Roleplay'];
     const devices = ['Any', 'PC', 'Mobile', 'Console', 'VR'];

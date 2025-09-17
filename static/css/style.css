@@ -108,7 +108,10 @@ textarea:focus {
     font-weight: 600;
     color: var(--text-accent);
     cursor: pointer;
-    list-style: none;
+    list-style: none; /* Hide the default ugly arrow */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .advanced-filters[open] summary {
@@ -240,4 +243,20 @@ textarea:focus {
 
 .play-button:hover {
     background-color: var(--primary-accent);
+}
+
+/* --- NEW STYLES for Advanced Filters Arrow --- */
+.advanced-filters summary::-webkit-details-marker {
+  display: none; /* Hide default arrow on Chrome/Safari */
+}
+
+.advanced-filters summary::after {
+  content: '▶'; /* Add our custom arrow */
+  font-size: 0.8em;
+  color: var(--text-accent);
+  transition: transform 0.2s ease-in-out;
+}
+
+.advanced-filters[open] > summary::after {
+  transform: rotate(90deg); /* Rotate the arrow when open */
 }
