@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 # Load environment variables from a .env file
 load_dotenv()
 
-app = Flask(__name__)
+# --- THE FIX IS ON THIS LINE ---
+# We are telling Flask to look for HTML files in the main directory ('.')
+# instead of the default 'templates' folder.
+app = Flask(__name__, template_folder='.')
+# --- END OF FIX ---
+
 # Enable CORS to allow your frontend to call this backend
 CORS(app)
 
@@ -18,18 +23,13 @@ CORS(app)
 api_keys_str = os.getenv("GEMINI_API_KEYS")
 
 # 2. Split the string into a list of keys
-#    We filter out any empty strings that might result from extra commas
 all_keys = [key.strip() for key in (api_keys_str or "").split(',') if key.strip()]
 
 # 3. Check if any keys were loaded
 if not all_keys:
     print("FATAL ERROR: GEMINI_API_KEYS not found or empty in .env file.")
-    # The application will not work without keys.
-    # We exit here or handle it gracefully.
-    # For simplicity, we'll let it fail when a request comes in.
 
 # 4. A global variable to track which key to use next.
-#    In a simple single-worker server like Flask's default, this is fine.
 current_key_index = 0
 
 # --- FLASK ROUTES ---
@@ -44,23 +44,17 @@ def index():
 def find_games():
     global current_key_index
 
-    # Check if there are any keys available to use
     if not all_keys:
         return jsonify({"error": "API keys are not configured on the server. The admin needs to set them up."}), 500
 
     try:
-        # --- Select and Configure the API Key for this specific request ---
         api_key_to_use = all_keys[current_key_index]
         genai.configure(api_key=api_key_to_use)
         
-        # Print to the server console to show which key is being used (for debugging)
         print(f"--- Using API Key index: {current_key_index} ---")
 
-        # --- Move to the next key for the *next* request ---
-        # The modulo (%) operator makes it loop back to 0 when it reaches the end
         current_key_index = (current_key_index + 1) % len(all_keys)
 
-        # --- The rest of the logic is the same as before ---
         filters = request.json
         model = genai.GenerativeModel('gemini-1.5-flash')
 
