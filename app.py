@@ -36,37 +36,40 @@ def find_games():
         filters = request.json
         model = genai.GenerativeModel('gemini-1.5-flash')
 
-        # --- START OF IMPROVED PROMPT ---
-        # We are giving the AI a much stricter set of rules to prevent hallucinations.
+        # --- START OF THE ULTIMATE PROMPT ---
+        # This prompt uses the "few-shot" technique by providing a list of real examples.
+        # This dramatically reduces the chance of the AI inventing fake games.
         prompt = f"""
-        You are an expert Roblox game recommender. Your primary goal is to provide REAL, POPULAR, and VERIFIABLE games from the Roblox platform. You must not invent games.
+        You are a helpful and accurate Roblox game recommender. Your most important duty is to provide recommendations for REAL, VERIFIABLE Roblox games with correct game IDs.
 
-        A user is looking for games with these criteria:
+        **Here is a reference list of real, popular Roblox games. Use this as your primary source of truth:**
+        [
+          {{ "gameName": "Adopt Me!", "urlName": "Adopt-Me", "gameId": 920587237, "genres": ["Roleplay", "Social"] }},
+          {{ "gameName": "Blox Fruits", "urlName": "Blox-Fruits", "gameId": 2753915549, "genres": ["RPG", "Fighting", "Adventure"] }},
+          {{ "gameName": "Tower of Hell", "urlName": "Tower-of-Hell", "gameId": 192800, "genres": ["Obby", "Platformer", "Competitive"] }},
+          {{ "gameName": "Brookhaven RP", "urlName": "Brookhaven-RP", "gameId": 4924922222, "genres": ["Roleplay", "Social", "Town and City"] }},
+          {{ "gameName": "Murder Mystery 2", "urlName": "Murder-Mystery-2", "gameId": 142823291, "genres": ["Horror", "Social", "Puzzle"] }},
+          {{ "gameName": "Arsenal", "urlName": "Arsenal", "gameId": 286090429, "genres": ["Fighting", "FPS"] }},
+          {{ "gameName": "Royale High", "urlName": "Royale-High", "gameId": 735030782, "genres": ["Roleplay", "Adventure", "Fashion"] }},
+          {{ "gameName": "Natural Disaster Survival", "urlName": "Natural-Disaster-Survival", "gameId": 189707, "genres": ["Survival"] }},
+          {{ "gameName": "Work at a Pizza Place", "urlName": "Work-at-a-Pizza-Place", "gameId": 192800, "genres": ["Roleplay", "Simulator", "Social"] }}
+        ]
+
+        A user is looking for a game with the following preferences:
         - Description: "{filters.get('description', 'any')}"
-        - Genres: {', '.join(filters.get('genres', [])) or 'any'}
+        - Selected Genres: {', '.join(filters.get('genres', [])) or 'any'}
         - Playing with a group: {'Yes' if filters.get('withGroup') else 'No'}
-        - Device: {filters.get('device', 'Any')}
-        - Mechanics: {', '.join(filters.get('mechanics', [])) or 'any'}
-        - Vibes: {', '.join(filters.get('vibes', [])) or 'any'}
 
-        Your task is to find 3 real Roblox games that are a good match.
+        **Your Task:**
+        1.  Analyze the user's preferences.
+        2.  Select the 3 best-matching games. **You should STRONGLY prefer games from the reference list above.**
+        3.  If a game from the reference list is a good match, use its exact data.
+        4.  If you absolutely must choose a game not on the list, you must be 100% certain it is a real, popular game and that you know its correct `gameId`. Do not guess.
+        5.  Return ONLY a valid JSON array of objects. Do not write any other text or markdown.
 
-        **CRITICAL INSTRUCTIONS:**
-        1.  **ACCURACY OVER CREATIVITY:** You must only return games that actually exist on Roblox.
-        2.  **VALID `gameId` IS MANDATORY:** The `gameId` is the most important piece of information. It will be used to create a URL like `https://www.roblox.com/games/GAMEID/URLNAME`. An incorrect `gameId` makes the result useless. Ensure the `gameId` is the correct, official ID for the game on the Roblox website.
-        3.  **PRIORITIZE POPULARITY:** Prefer well-known games that are likely to still be active.
-        4.  **STRICT JSON OUTPUT:** Return ONLY a valid JSON array of objects. Do not include any introductory text, markdown, or anything outside of the `[...]`.
-
-        The JSON object for each game must have these exact keys:
-        - "gameName": The exact, official name of the game.
-        - "urlName": A URL-friendly version of the name (e.g., "Adopt-Me").
-        - "gameId": The correct, numeric ID of the game from its official Roblox page.
-        - "description": A short, engaging description (2-3 sentences).
-        - "matchRating": A number from 1 to 10 rating how well it matches the user's criteria.
-
-        If you are not certain about a game's existence or its `gameId`, do not include it. It is better to return 1 or 2 accurate results than 3 invented ones.
+        The JSON object for each game must have these keys: "gameName", "urlName", "gameId", "description", "matchRating".
         """
-        # --- END OF IMPROVED PROMPT ---
+        # --- END OF THE ULTIMATE PROMPT ---
 
         response = model.generate_content(prompt)
         
